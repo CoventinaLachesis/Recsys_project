@@ -1,13 +1,11 @@
 def process_file(file_path, output_file):
     total_interactions = 0
     u_interaction_counts = {}
-    unique_interactions = set()
+    unique_U = set()
     interactions_limit = 100000
 
-    interaction_mapping = {}
     u_mapping = {}
-    next_interaction_id = 1
-    next_u_id = 1
+    next_u_id = 0
 
     with open(file_path, 'r') as file, open(output_file, 'w') as out_file:
         for line in file:
@@ -17,8 +15,8 @@ def process_file(file_path, output_file):
                 U = numbers[0]  # First integer is U
                 interactions = numbers[1:]  # Remaining integers are interactions
 
-                # Skip U if it has fewer than 200 interactions
-                if len(interactions) < 200:
+                # Skip U if it has fewer than 15 interactions
+                if len(interactions) < 15:
                     continue
 
                 # Map U to a new order
@@ -32,37 +30,30 @@ def process_file(file_path, output_file):
                     u_interaction_counts[mapped_U] = 0
                 u_interaction_counts[mapped_U] += len(interactions)
 
-                # Map interactions to a new order
-                mapped_interactions = []
-                for interaction in interactions:
-                    if interaction not in interaction_mapping:
-                        interaction_mapping[interaction] = next_interaction_id
-                        next_interaction_id += 1
-                    mapped_interactions.append(interaction_mapping[interaction])
-
-                # Add mapped interactions to the unique set
-                unique_interactions.update(mapped_interactions)
+                # Add U to the unique set
+                unique_U.add(mapped_U)
 
                 # Count total interactions
                 total_interactions += len(interactions)
 
-                # Write filtered information with new order to the output file
-                out_file.write(f"{mapped_U} " + " ".join(map(str, mapped_interactions)) + "\n")
+                # Write filtered information with remapped U to the output file
+                out_file.write(f"{mapped_U} " + " ".join(map(str, interactions)) + "\n")
 
                 # Stop if we exceed or reach the limit
                 if total_interactions >= interactions_limit:
                     break
 
-    return total_interactions, len(unique_interactions), len(u_mapping), u_interaction_counts
+    return total_interactions, len(unique_U), u_interaction_counts
 
 # Example usage
-file_path = 'train.txt'  # Replace with the actual path to your input file
-output_file = 'filtered_train.txt'  # Replace with the desired output file path
-interactions, unique_interaction_count, unique_U_count, u_interaction_counts = process_file(file_path, output_file)
-
+# Example usage
+file_path_train = 'train.txt'  # Replace with the actual path to your input file
+output_file_train = 'filtered_train.txt'  # Replace with the desired output file path
+interactions, unique_U_count, u_interaction_counts = process_file(file_path_train, output_file_train)
+file_path_test = 'test.txt'  # Replace with the actual path to your input file
+output_file_test = 'filtered_test.txt'  # Replace with the desired output file path
+interactions, unique_U_count, u_interaction_counts = process_file(file_path_test, output_file_test)
 print(f"Total interactions: {interactions}")
-print(f"Unique interactions overall: {unique_interaction_count}")
+print(f"Unique interactions overall: {u_interaction_counts}")
 print(f"Unique U count: {unique_U_count}")
 print("Counts of interactions per mapped U:")
-for mapped_U, count in u_interaction_counts.items():
-    print(f"Mapped U = {mapped_U}, Total Interactions = {count}")
