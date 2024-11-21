@@ -167,7 +167,7 @@ class LightGCN(BasicModel):
             embs.append(all_emb)
         embs = torch.stack(embs, dim=1)
         #print(embs.size())
-        light_out = torch.mean(embs, dim=1)
+        light_out = torch.mean(embs, dim=1) #a(k) = 1/k+1 = mean
         users, items = torch.split(light_out, [self.num_users, self.num_items])
         return users, items
     
